@@ -3,7 +3,7 @@
 #' @return A shiny dashboard UI
 #' @author Jared Andrews
 #' 
-#' @importFrom shiny fluidRow column numericInput
+#' @importFrom shiny fluidRow column numericInput div a img
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar dashboardBody box
 #' @importFrom igvShiny igvShinyOutput
 #' @importFrom DT DTOutput
@@ -11,9 +11,11 @@
 #' @rdname INTERNAL_create_ui
 .create_ui <- function() {
     dashboardPage(
-        dashboardHeader(title = "ASOspotter"),
+        dashboardHeader(title = div(a(img(src = "logo/logo.png", height = "50"),
+                                      href = "https://github.com/j-andrews7/ASOspotter"
+        ), "ASOspotter")),
         dashboardSidebar(
-            numericInput("wing_size", "Wing size", value = 250, min = 1, max = 10000, step = 1)
+            numericInput("wing_size", "Wing size", value = 50, min = 1, max = 10000, step = 1)
         ),
         dashboardBody(
             fluidRow(

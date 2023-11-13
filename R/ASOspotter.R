@@ -2,18 +2,19 @@
 #' 
 #' @param vcf A path to a VCF file.
 #' @param bam A path to a BAM file.
+#' @param genome The genome to use. Options include "hg38", "hg19", and "mm10".
 #' @return A shiny app to interactively view variants.
 #' 
-#' @importFrom vcfR read.vcfR
+#' @importFrom vcfR read.vcfR getFIX
 #' @importFrom GenomicRanges GRanges
 #' @importFrom IRanges IRanges
 #' @importFrom GenomicAlignments readGAlignments 
 #' @importFrom Rsamtools ScanBamParam
-#' @importFrom igvShiny renderIgvShiny igvShinyOutput showGenomicRegion loadBamTrackFromLocalData 
+#' @importFrom igvShiny igvShiny renderIgvShiny igvShinyOutput showGenomicRegion loadBamTrackFromLocalData 
 #'   parseAndValidateGenomeSpec loadVcfTrack
 #' @importFrom DT renderDT datatable
 #' @importFrom VariantAnnotation readVcf
-#' @importFrom shiny shinyApp addResourcePath observeEvent reactiveValues
+#' @importFrom shiny shinyApp addResourcePath observeEvent reactiveValues isolate
 #' 
 #' @author Jared Andrews
 #' @export
@@ -24,12 +25,12 @@
 #' \dontrun{
 #' ASOspotter(vcf, bam)
 #' }
-ASOspotter <- function(vcf, bam, genome = "hg38", track_dir = "./tracks") {
+ASOspotter <- function(vcf, bam, genome = "hg38") {
 
     # Make local dir for track subsets.
-    if(!dir.exists(track_dir))
-        dir.create(track_dir)
-    addResourcePath("tracks", track_dir)
+    if(!dir.exists("tracks"))
+        dir.create("tracks")
+    addResourcePath("tracks", "tracks")
 
     # Load the VCF
     vcf.records <- read.vcfR(vcf)

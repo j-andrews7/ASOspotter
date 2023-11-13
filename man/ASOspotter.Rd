@@ -4,12 +4,14 @@
 \alias{ASOspotter}
 \title{Create the ASOspotter Shiny app}
 \usage{
-ASOspotter(vcf, bam, genome = "hg38", track_dir = "./tracks")
+ASOspotter(vcf, bam, genome = "hg38")
 }
 \arguments{
 \item{vcf}{A path to a VCF file.}
 
 \item{bam}{A path to a BAM file.}
+
+\item{genome}{The genome to use. Options include "hg38", "hg19", and "mm10".}
 }
 \value{
 A shiny app to interactively view variants.
