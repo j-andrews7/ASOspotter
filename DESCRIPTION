@@ -1,0 +1,30 @@
+Package: ASOspotter
+Title: What the Package Does (One Line, Title Case)
+Version: 0.99.0.9000
+Authors@R: 
+    person(given = "Jared",
+           family = "Andrews",
+           role = c("aut", "cre"),
+           email = "jared.andrews07@gmail.com",
+           comment = c(ORCID = "0000-0002-0780-6248"))
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Encoding: UTF-8
+URL: https://github.com/j-andrews7/ASOspotter
+BugReports: https://github.com/j-andrews7/ASOspotter/issues
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports:
+    DT,
+    shiny,
+    shinydashboard,
+    igvShiny,
+    GenomicRanges,
+    GenomicAlignments,
+    Rsamtools,
+    VariantAnnotation,
+    IRanges
+Remotes:
+    gladkia/igvShiny
+Depends:
+    R (>= 4.3.1)
