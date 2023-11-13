@@ -1,4 +1,29 @@
-# <img src="inst/logo/logo.png" alt="CRISRPball" height="200"> ASOspotter
+---
+title: "ASOspotter Quick Start"
+author: 
+- name: "Jared Andrews"
+  email: jared.andrews07@gmail.com
+  affiliation: St. Jude Children's Research Hospital, Memphis, TN
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('ASOspotter')`"
+output: 
+  BiocStyle::html_document:
+    code_folding: show
+    toc: true
+    toc_depth: 3
+    toc_float: true	 
+vignette: >
+  %\VignetteIndexEntry{ASOspotter Quick Start}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+library(BiocStyle)
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", message = FALSE, warning = FALSE)
+```
+
+# Introduction
 
 So you wanna look at anti-sense oligonucleotide target mutations, eh? Well, you've come to the right place.
 
@@ -6,7 +31,7 @@ So you wanna look at anti-sense oligonucleotide target mutations, eh? Well, you'
 
 **ASOspotter** is available on Github and can be installed as follows:
 
-```r
+```{r, eval = FALSE}
 devtools::install_github("j-andrews7/ASOspotter")
 ```
 
@@ -17,7 +42,7 @@ The app just requires a BAM file and corresponding VCF file.
 It will create a "tracks" directory in the working directory for internal use for data subsetting. 
 Currently, this directory cannot be changed and is not deleted after the app is closed due to the internals of `shinyIGV`.
 
-```r
+```{r, eval = FALSE}
 library("ASOspotter")
 
 # Using built-in example data.
@@ -34,3 +59,15 @@ Clicking on a variant in the IGV.js instance will display additional info on the
 The wing size can be adjusted to increase or decrease the size of the locus displayed in the IGV.js instance when a variant is clicked. 
 The default is 50 bp on either side of the variant. 
 Users are free to zoom in/out and scroll as they please.
+
+## SessionInfo
+
+<details>
+
+<summary>Click to expand</summary>
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
+</details>
