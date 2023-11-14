@@ -23,7 +23,8 @@ Imports:
     GenomicAlignments,
     Rsamtools,
     VariantAnnotation,
-    IRanges
+    IRanges,
+    vcfR
 Remotes:
     gladkia/igvShiny
 Depends:
