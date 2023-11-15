@@ -48,10 +48,12 @@ library("ASOspotter")
 # Using built-in example data.
 bam <- system.file("extdata", "NA12878.sub.sorted.bam", package = "ASOspotter")
 vcf <- system.file("extdata", "NA12878_HG001.hg38.benchmark.subset.vcf.gz", package = "ASOspotter")
+bed <- system.file("extdata", "hg38_cgi.bed", package = "ASOspotter")
 
+beds <- list("CpG Islands" = bed)
 bams <- list("NA12878" = bam, "NA12878_again" = bam)
 
-ASOspotter(vcf = vcf, bams = bams, genome = "hg38")
+ASOspotter(vcf = vcf, bams = bams, beds = beds, genome = "hg38")
 ```
 
 The app is composed of an IGV.js instance and a table of variants located below the tracks. 

@@ -3,6 +3,8 @@
 #' @param vcf Character scalar of path to a VCF file.
 #' @param bams A named list of character scalars of paths to BAM files. 
 #'   Element names will be used as track names. 
+#' @param beds An optional named list of character scalars of paths to BED files. 
+#'   Element names will be used as track names. 
 #' @param genome The genome to use. 
 #'   See \code{\link[igvShiny]{currently.supported.stock.genomes()}} for all supported genomes.
 #' @return A shiny app to interactively view variants.
@@ -13,8 +15,8 @@
 #' @importFrom GenomicAlignments readGAlignments
 #' @importFrom Rsamtools ScanBamParam
 #' @importFrom igvShiny igvShiny renderIgvShiny igvShinyOutput showGenomicRegion loadBamTrackFromLocalData
-#'   parseAndValidateGenomeSpec loadVcfTrack
-#' @importFrom DT renderDT datatable
+#'   parseAndValidateGenomeSpec loadVcfTrack loadBedTrack
+#' @importFrom DT renderDT datatable formatStyle
 #' @importFrom VariantAnnotation readVcf
 #' @importFrom shiny shinyApp addResourcePath observeEvent reactiveValues isolate
 #'
@@ -24,11 +26,13 @@
 #' library(ASOspotter)
 #' vcf <- system.file("extdata", "NA12878_HG001.hg38.benchmark.subset.vcf.gz", package = "ASOspotter")
 #' bam <- system.file("extdata", "NA12878.sub.sorted.bam", package = "ASOspotter")
+#' bed <- system.file("extdata", "hg38_cgi.bed", package = "ASOspotter")
+#' beds <- list("CpG Islands" = bed)
 #' bams <- list("NA12878" = bam, "NA12878_again" = bam)
 #' \dontrun{
-#' ASOspotter(vcf = vcf, bams = bams)
+#' ASOspotter(vcf = vcf, bams = bams, beds = beds)
 #' }
-ASOspotter <- function(vcf, bams, genome = "hg38") {
+ASOspotter <- function(vcf, bams, beds = NULL, genome = "hg38") {
     # Make local dir for track subsets.
     if (!dir.exists("tracks")) {
         dir.create("tracks")
@@ -57,8 +61,8 @@ ASOspotter <- function(vcf, bams, genome = "hg38") {
             locus_gr = GRanges(
                 seqnames = vcf.records[1, "CHROM"],
                 ranges = IRanges(
-                    start = as.numeric(vcf.records[1, "POS"]) - 250,
-                    end = as.numeric(vcf.records[1, "POS"]) + 250
+                    start = as.numeric(vcf.records[1, "POS"]) - 50,
+                    end = as.numeric(vcf.records[1, "POS"]) + 50
                 )
             )
         )
@@ -73,10 +77,16 @@ ASOspotter <- function(vcf, bams, genome = "hg38") {
 
             showGenomicRegion(session, id = "igv", robjects$locus)
 
-            # Get the bam data
+            # Add/plot the tracks
             for (b in seq_along(bams)) {
                 reads <- readGAlignments(bams[[b]], param = ScanBamParam(which = robjects$locus_gr, what = "seq"))
                 loadBamTrackFromLocalData(session, id = "igv", data = reads, trackName = names(bams)[b])
+            }
+
+            for (be in seq_along(beds)) {
+                bed <- read.table(beds[[be]], sep = "\t", header = FALSE, stringsAsFactors = FALSE)
+                colnames(bed)[1:3] <- c("chr", "start", "end")
+                loadBedTrack(session, id = "igv", tbl = bed, trackName = names(beds)[be])
             }
 
             # And variants.
@@ -90,7 +100,18 @@ ASOspotter <- function(vcf, bams, genome = "hg38") {
         })
 
         output$variants <- renderDT({
-            datatable(vcf.records, selection = "single", rownames = FALSE)
+            datatable(vcf.records, 
+                filter = "top",
+                extensions = c("Buttons"), 
+                selection = "single", 
+                rownames = FALSE,
+                options = list(
+                    search = list(regex = TRUE),
+                    pageLength = 10,
+                    dom = "Blfrtip",
+                    buttons = c("copy", "csv", "excel", "pdf", "print")
+                )
+            ) %>% formatStyle(0, target = "row", lineHeight = "50%")
         })
     }
 

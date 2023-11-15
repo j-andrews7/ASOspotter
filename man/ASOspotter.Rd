@@ -4,12 +4,15 @@
 \alias{ASOspotter}
 \title{Create the ASOspotter Shiny app}
 \usage{
-ASOspotter(vcf, bams, genome = "hg38")
+ASOspotter(vcf, bams, beds = NULL, genome = "hg38")
 }
 \arguments{
 \item{vcf}{Character scalar of path to a VCF file.}
 
 \item{bams}{A named list of character scalars of paths to BAM files.
+Element names will be used as track names.}
+
+\item{beds}{An optional named list of character scalars of paths to BED files.
 Element names will be used as track names.}
 
 \item{genome}{The genome to use.
@@ -25,9 +28,11 @@ Create the ASOspotter Shiny app
 library(ASOspotter)
 vcf <- system.file("extdata", "NA12878_HG001.hg38.benchmark.subset.vcf.gz", package = "ASOspotter")
 bam <- system.file("extdata", "NA12878.sub.sorted.bam", package = "ASOspotter")
+bed <- system.file("extdata", "hg38_cgi.bed", package = "ASOspotter")
+beds <- list("CpG Islands" = bed)
 bams <- list("NA12878" = bam, "NA12878_again" = bam)
 \dontrun{
-ASOspotter(vcf = vcf, bams = bams)
+ASOspotter(vcf = vcf, bams = bams, beds = beds)
 }
 }
 \author{
