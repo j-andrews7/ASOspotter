@@ -1,35 +1,38 @@
 #' Create the ASOspotter Shiny app
-#' 
-#' @param vcf A path to a VCF file.
-#' @param bam A path to a BAM file.
-#' @param genome The genome to use. Options include "hg38", "hg19", and "mm10".
+#'
+#' @param vcf Character scalar of path to a VCF file.
+#' @param bams A named list of character scalars of paths to BAM files. 
+#'   Element names will be used as track names. 
+#' @param genome The genome to use. 
+#'   See \code{\link[igvShiny]{currently.supported.stock.genomes()}} for all supported genomes.
 #' @return A shiny app to interactively view variants.
-#' 
+#'
 #' @importFrom vcfR read.vcfR getFIX
 #' @importFrom GenomicRanges GRanges
 #' @importFrom IRanges IRanges
-#' @importFrom GenomicAlignments readGAlignments 
+#' @importFrom GenomicAlignments readGAlignments
 #' @importFrom Rsamtools ScanBamParam
-#' @importFrom igvShiny igvShiny renderIgvShiny igvShinyOutput showGenomicRegion loadBamTrackFromLocalData 
+#' @importFrom igvShiny igvShiny renderIgvShiny igvShinyOutput showGenomicRegion loadBamTrackFromLocalData
 #'   parseAndValidateGenomeSpec loadVcfTrack
 #' @importFrom DT renderDT datatable
 #' @importFrom VariantAnnotation readVcf
 #' @importFrom shiny shinyApp addResourcePath observeEvent reactiveValues isolate
-#' 
+#'
 #' @author Jared Andrews
 #' @export
 #' @examples
 #' library(ASOspotter)
 #' vcf <- system.file("extdata", "NA12878_HG001.hg38.benchmark.subset.vcf.gz", package = "ASOspotter")
 #' bam <- system.file("extdata", "NA12878.sub.sorted.bam", package = "ASOspotter")
+#' bams <- list("NA12878" = bam, "NA12878_again" = bam)
 #' \dontrun{
-#' ASOspotter(vcf, bam)
+#' ASOspotter(vcf = vcf, bams = bams)
 #' }
-ASOspotter <- function(vcf, bam, genome = "hg38") {
-
+ASOspotter <- function(vcf, bams, genome = "hg38") {
     # Make local dir for track subsets.
-    if(!dir.exists("tracks"))
+    if (!dir.exists("tracks")) {
         dir.create("tracks")
+    }
     addResourcePath("tracks", "tracks")
 
     # Load the VCF
@@ -37,22 +40,27 @@ ASOspotter <- function(vcf, bam, genome = "hg38") {
     vcf.records <- cbind(as.data.frame(getFIX(vcf.records)), as.data.frame(vcf.records@gt))
 
     # Get initial locus
-    initialLocus <- paste0(vcf.records[1, "CHROM"], ":", 
-                           as.numeric(vcf.records[1, "POS"]) - 250, "-", as.numeric(vcf.records[1, "POS"]) + 250)
+    initialLocus <- paste0(
+        vcf.records[1, "CHROM"], ":",
+        as.numeric(vcf.records[1, "POS"]) - 250, "-", as.numeric(vcf.records[1, "POS"]) + 250
+    )
 
     # Set igvShiny options
-    opts <- parseAndValidateGenomeSpec(genomeName = genome,  initialLocus = initialLocus)
+    opts <- parseAndValidateGenomeSpec(genomeName = genome, initialLocus = initialLocus)
 
     # Create the UI
     ui <- .create_ui()
-    
+
     server <- function(input, output, session) {
-        
         robjects <- reactiveValues(
             locus = initialLocus,
-            locus_gr = GRanges(seqnames = vcf.records[1, "CHROM"], 
-                               ranges = IRanges(start = as.numeric(vcf.records[1, "POS"]) - 250, 
-                                                end = as.numeric(vcf.records[1, "POS"]) + 250))
+            locus_gr = GRanges(
+                seqnames = vcf.records[1, "CHROM"],
+                ranges = IRanges(
+                    start = as.numeric(vcf.records[1, "POS"]) - 250,
+                    end = as.numeric(vcf.records[1, "POS"]) + 250
+                )
+            )
         )
 
         # Observe for variant table click
@@ -63,10 +71,13 @@ ASOspotter <- function(vcf, bam, genome = "hg38") {
             robjects$locus <- paste0(chr, ":", start, "-", end)
             robjects$locus_gr <- GRanges(seqnames = chr, ranges = IRanges(start = start, end = end))
 
-            # Get the bam data
-            reads <- readGAlignments(bam, param = ScanBamParam(which = robjects$locus_gr, what = "seq"))
             showGenomicRegion(session, id = "igv", robjects$locus)
-            loadBamTrackFromLocalData(session, id = "igv", data = reads, trackName = "Alignments")
+
+            # Get the bam data
+            for (b in seq_along(bams)) {
+                reads <- readGAlignments(bams[[b]], param = ScanBamParam(which = robjects$locus_gr, what = "seq"))
+                loadBamTrackFromLocalData(session, id = "igv", data = reads, trackName = names(bams)[b])
+            }
 
             # And variants.
             vc <- readVcf(vcf, genome, param = robjects$locus_gr)

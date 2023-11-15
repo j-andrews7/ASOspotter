@@ -37,7 +37,7 @@ devtools::install_github("j-andrews7/ASOspotter")
 
 ## Usage
 
-The app just requires a BAM file and corresponding VCF file.
+The app just requires a named list of BAM files and corresponding VCF file.
 
 It will create a "tracks" directory in the working directory for internal use for data subsetting. 
 Currently, this directory cannot be changed and is not deleted after the app is closed due to the internals of `shinyIGV`.
@@ -49,7 +49,9 @@ library("ASOspotter")
 bam <- system.file("extdata", "NA12878.sub.sorted.bam", package = "ASOspotter")
 vcf <- system.file("extdata", "NA12878_HG001.hg38.benchmark.subset.vcf.gz", package = "ASOspotter")
 
-ASOspotter(vcf = vcf, bam = bam, genome = "hg38")
+bams <- list("NA12878" = bam, "NA12878_again" = bam)
+
+ASOspotter(vcf = vcf, bams = bams, genome = "hg38")
 ```
 
 The app is composed of an IGV.js instance and a table of variants located below the tracks. 
